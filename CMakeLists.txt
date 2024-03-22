@@ -6,7 +6,7 @@ project (8SAP LANGUAGES CXX)
 
 set (CMAKE_CXX_STANDARD 11)
 
-set(TARGET_NAME ${PROJECT_NAME}.app)
+set(TARGET_NAME ${PROJECT_NAME}.exe)
 add_executable(${TARGET_NAME} ${SOURCES})
 
 target_include_directories(${TARGET_NAME} PUBLIC

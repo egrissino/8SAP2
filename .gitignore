@@ -31,5 +31,8 @@
 *.out
 *.app
 
+logs/
 build/
+*.log
+*.txt
 .DS_Store

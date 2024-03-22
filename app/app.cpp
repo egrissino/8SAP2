@@ -350,9 +350,9 @@ void debugPrint ()
     // printf("RC4: %d |\t", RC4_Node.get_value());
     // printf("RC5: %d |\t", RC5_Node.get_value());
     
-    printf("T: %f |\t C: %d |\t", time_sec, clk.Clk.get_value());
-    printf("Bus: %d |\t", mainBus.get_value().byte);
-    printf("PC: %d |\t", pc.get_value());
+    printf("T: %5.2f |\t C: %3d |\t", time_sec, clk.Clk.get_value());
+    printf("Bus: %3d |\t", mainBus.get_value().byte);
+    printf("PC: %3d |\t", pc.get_value());
 
     // printf("PCp: %d \t", getPinGroup(pc.Q_pins));
     // printf("PCBus: %d \t", pcBus.get_value().byte);
@@ -360,7 +360,7 @@ void debugPrint ()
     // printf("PCBufferO: %d \t", getPinGroup(pcb.Q_pins));
     // printf("Mar: %d \t", getPinGroup(mar.Q_pins));
 
-    printf("Mar: %d |\t", mar.getLatchValue());
+    printf("Mar: %2d |\t", mar.getLatchValue());
     // printf("MarBus: %d \n", marBus.get_value().byte);
     // printf("MemIO: %d \n", getPinGroup(eeprom.io_pins));
 
@@ -368,8 +368,8 @@ void debugPrint ()
     printf("Op:  0b%1d%1d%1d%1d |\t",(bool)OPCode[3].get_value(), (bool)OPCode[2].get_value(), (bool)OPCode[1].get_value(), (bool)OPCode[0].get_value());
     printf("CT:  0x%02x%02x |\t", (uint8_t)controlHBus.get_value().byte, (uint8_t)controlLBus.get_value().byte );
     
-    printf ("IRDLO: %d |\t", getPinGroup(IRDecoderL.Q_pins));
-    printf ("IRDHO: %d |\t", getPinGroup(IRDecoderH.Q_pins));
+    printf ("IRDLO: %2d |\t", getPinGroup(IRDecoderL.Q_pins));
+    printf ("IRDHO: %2d |\t", getPinGroup(IRDecoderH.Q_pins));
 
     // printf ("RC4 : %d |\t", (bool)OPCode[3].get_value());
     // printf ("NRC4: %d |\t", NOPC4.get_value());
@@ -401,7 +401,8 @@ void run ()
 
     for (int i = 0; i < n_steps; i++) 
     {
-       printf("\nTimestep: %d |\t", i);
+    //    printf("\n");
+        // printf ("Timestep: %d |\t", i);
         
         // record time and set clock
         time_sig[i] = time_sec;
@@ -430,6 +431,7 @@ void run ()
         if ( (i==0) || (!clock && (clk.Clk.get_value() == kLogicHigh)) ) 
         {
             debugPrint ();
+            printf ("\n");
             clock = (bool)kLogicHigh;
         }
         
