@@ -1,3 +1,4 @@
-[submodule "DigitalCircuitSim"]
+[submodule "lib/DigitalCircuitSim"]
 	path = lib/DigitalCircuitSim
-	url = https://github.com/egrissino/DigitalCircuitSim
+	url = https://github.com/egrissino/DigitalCircuitSim.git
+
