@@ -1,0 +1,3 @@
+[submodule "DigitalCircuitSim"]
+	path = lib/DigitalCircuitSim
+	url = https://github.com/egrissino/DigitalCircuitSim
