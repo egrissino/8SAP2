@@ -173,11 +173,55 @@ void setup()
     RC4_Node.connect(&rc.Q_pins.pins[3]);
     RC5_Node.connect(&rc.Q_pins.pins[4]);
 
+    //============================================================//
     /*
     op    Seq     Control
     4  ->  16  ->  20
+    LA 4OR LDA, ADD, LDM
+
+    LDA
+    IE, LM | ME, LA
+
+    LDB
+    IE, LM | ME, LB
+
+    STR
+    IE, LM, | AE, WE
+
+    ADD (SUB)
+    (SU)
+    LF | UE, LA
+
+    CLR
+    | <LA; LB; LO; LP; LM; LF;> 
+
+    OUT
+    | AE, LO
+
+    LDM
+    AE, LM | ME, LA
+
+    AO, LP?
+    JPZ
+    Z !
+    EI, LM | ME, LP
+
+    JPC
+    C !
+    EI, LM | ME, LP
+
+    JMP
+    EI, LM | ME, LP
+
+    STM
+    AE, LM | UE, WE
+
+    MOV
+    | AE, LB
+
     */
 
+    //============================================================//
     /*
     -> 4 bit op code           
         (IR[4:]) 
@@ -192,6 +236,31 @@ void setup()
         OPCode[i].connect(&ir.Q_pins.pins[i+4]);
     }
 
+    //============================================================//
+
+    /*
+    -> 16 bit Instruction bus
+        ( 2 x Decoder3to8 ) decodes to 16 channels
+        0  |  NOP
+        1  |  LDI
+        2  |  LDA
+        3  |  LDB 
+        4  |  JMP
+        5  |  JPZ
+        6  |  JPC
+        7  |  STR
+        8  |  LDM
+        9  |  MOV
+        10 |  OUT
+        11 |  STM
+        12 |  ADD
+        13 |  SUB
+        14 |  SFT
+        15 |  HLT
+
+         instruction decoder     ( OR gates )
+    */
+
     // Connect OPCode to the decoders
     for (int i = 0;i < 3;i++) 
     {
@@ -205,51 +274,34 @@ void setup()
     
     NOPC4.connect(&Not_IRLe.Out1);
     NOPC4.connect(&IRDecoderL.OutputEnable);
-    /*
-    -> 16 bit Instruction bus
-        ( 2 x Decoder3to8 ) decodes to 16 channels
-        0  |  NOP
-        1  |  LDA
-        2  |  LDB
-        3  |  STR 
-        4  |  ADD
-        5  |  SUB
-        6  |  CLR
-        7  |  OUT
-        8  |  LDM
-        9  |  JPZ
-        10 |  JPC
-        11 |  JMP
-        12 |  STM
-        13 |  MOV
-        14 |  SFT
-        15 |  HLT
-
-         instruction decoder     ( OR gates )
-    */
     
 
+
+
+
+    
+    //============================================================//
     /*
     -> 16 bit Sequencer
         ( 2 x Buffers )
         Buffer1 - Sequence RC4 : Instruction Execute 1
-            0  |  LM_1
-            1  |  LS_1
-            2  |  EI_1
-            3  |  AE_1
-            4  |  LA_1
-            5  |  LB_1
-            6  |  SH_1
-            7  |  RS_1
+            0  |  EI_1
+            1  |  LM_1
+            2  |  LA_1
+            3  |  LB_1
+            4  |  AE_1
+            5  |  LS_1
+            6  |  LO_1
+            7  |  SE_1
         Buffer2 - Sequence RC5 : Instruction Execute 2
-            0  |  LA_2
-            1  |  LB_2
-            2  |  LO_2
-            3  |  ME_2
-            4  |  AE_2
-            5  |  LP_2
-            6  |  UE_2
-            7  |  WE_2
+            0  |  ME_2
+            1  |  LA_2
+            2  |  UE_2
+            3  |  LP_2
+            4  |  WE_2
+            5  |  ---
+            6  |  ---
+            7  |  ---
 
         sequence decoder
             ( OR gates )
@@ -258,7 +310,13 @@ void setup()
     RC4_Node.connect(&Seq1Buffer.OutputEnable);
     RC5_Node.connect(&Seq2Buffer.OutputEnable);
 
-    
+
+
+
+
+
+
+    //============================================================//
     /*
     -> 20 bit Control output Bus      (8 Fixed control) + (12 bit Sequenced control)
 
@@ -266,25 +324,27 @@ void setup()
         0 |  PC_Out              // Fetch Outputs
         1 |  PC_Count
         2 |  IR_Load
-        3 |  - reserved
-        4 |  Subtract            // Instruction Modify outputs
+        -----------------------
+        3 |  StoreMem           // Instruction Modify outputs
+        4 |  Subtract            
         5 |  JumpZero
         6 |  JumpCarry
         7 |  HALT
 
         // Buffered Outs (Execute)
-        0  |  MAR_Load 
-        1  |  A_Load
-        2  |  B_Load
-        3  |  PC_Load
-        4  |  Out_Load
-        5  |  RAM_Out
-        6  |  A_Out
-        7  |  IR_Out
-        8  |  Adder_Out
-        9  |  SR_Load
-        10 |  RAM_WE
-        11 |  SFT
+        0  |  MAR_Load
+        1  |  B_Load
+        2  |  Status_Load
+        3  |  Out_Load
+        4  |  IR_Out
+        5  |  A_Out
+        6  |  Shift_Out
+        7  |  A_Load
+        ------------
+        8  |  Mem_Out
+        9  |  Alu_Out
+        10 |  PC_Load
+        11 |  Mem_Load
     */
 
     // Connect control to ring counter
@@ -295,47 +355,7 @@ void setup()
     RC3_Node.connect(&Not_OE.In1);      // Add to OR Gate
     RC3_Node.connect(&ir.LatchEnable);
 
-    // LA 4OR LDA, ADD, LDM
-
-    // LDA
-    // IE, LM | ME, LA
-
-    // LDB
-    // IE, LM | ME, LB
-
-    // STR
-    // IE, LM, | AE, WE
-
-    // ADD (SUB)
-    // (SU)
-    // LF | UE, LA
-
-    // CLR
-    // | <LA; LB; LO; LP; LM; LF;> 
-
-    // OUT
-    // | AE, LO
-
-    // LDM
-    //AE, LM | ME, LA
-
-    // AO, LP?
-    // JPZ
-    // Z !
-    // EI, LM | ME, LP
-
-    // JPC
-    // C !
-    // EI, LM | ME, LP
-
-    // JMP
-    // EI, LM | ME, LP
-
-    // STM
-    // AE, LM | UE, WE
-
-    // MOV
-    // | AE, LB
+    
 
     // Print info for init
     printf("VCC   PinID: %d \t| PinState   : %d\n", Source.get_id(), Source.get_state());
